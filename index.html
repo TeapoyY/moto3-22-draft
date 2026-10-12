@@ -1,0 +1,1133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0a0e14">
+<title>🏍 22-0: Moto3 Draft — Can You Sweep The Season?</title>
+<meta name="description" content="Draft legendary Moto3 riders across the eras and try to win every race in a 22-round Grand Prix season. 84 legends. 6 eras. 22 rounds. 1 goal: 22-0.">
+<style>
+  :root {
+    --bg: #0a0e14;
+    --panel: #141a24;
+    --panel2: #1c2330;
+    --border: #2a3344;
+    --text: #e8eef5;
+    --muted: #8a96a8;
+    --accent: #ff6b00;          /* Moto3 orange - KTM GasGas Husqvarna */
+    --accent2: #ffffff;        /* White */
+    --good: #4ade80;
+    --bad: #f87171;
+    --gold: #fbbf24;
+    --shadow: 0 4px 20px rgba(0,0,0,0.4);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  body {
+    background:
+      radial-gradient(ellipse at top, rgba(220,38,38,0.08), transparent 50%),
+      linear-gradient(180deg, var(--bg) 0%, #050810 100%);
+  }
+  .wrap {
+    max-width: 920px;
+    margin: 0 auto;
+    padding: 16px;
+  }
+  header {
+    text-align: center;
+    padding: 20px 0 12px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 18px;
+  }
+  header h1 {
+    font-size: clamp(28px, 6vw, 44px);
+    font-weight: 900;
+    letter-spacing: -0.02em;
+    background: linear-gradient(135deg, var(--accent2) 0%, var(--accent) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 4px;
+  }
+  header .tagline {
+    color: var(--muted);
+    font-size: 14px;
+    font-weight: 500;
+  }
+  .tabs {
+    display: flex;
+    gap: 4px;
+    background: var(--panel);
+    padding: 4px;
+    border-radius: 12px;
+    margin-bottom: 16px;
+    border: 1px solid var(--border);
+    overflow-x: auto;
+  }
+  .tab {
+    flex: 1;
+    min-width: 70px;
+    background: transparent;
+    color: var(--muted);
+    border: none;
+    padding: 10px 8px;
+    font-size: 12px;
+    font-weight: 700;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: center;
+  }
+  .tab.active {
+    background: var(--accent);
+    color: #000;
+  }
+  .tab:not(.active):hover {
+    color: var(--text);
+    background: var(--panel2);
+  }
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 12px;
+    box-shadow: var(--shadow);
+  }
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  .stat {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 8px;
+    text-align: center;
+  }
+  .stat .v {
+    font-size: 22px;
+    font-weight: 900;
+    color: var(--accent2);
+  }
+  .stat .l {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 2px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .era-tag {
+    display: inline-block;
+    background: var(--accent);
+    color: #000;
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    margin-right: 4px;
+  }
+  .driver-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(135px, 1fr));
+    gap: 8px;
+  }
+  .driver-card {
+    background: var(--panel2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px;
+    cursor: pointer;
+    transition: all 0.15s;
+    position: relative;
+    user-select: none;
+  }
+  .driver-card:hover:not(.drafted):not(.disabled) {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(220,38,38,0.25);
+  }
+  .driver-card.drafted {
+    background: var(--accent);
+    border-color: var(--accent2);
+    color: #000;
+    cursor: default;
+    opacity: 0.85;
+  }
+  .driver-card.disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+  .driver-card .ovr {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    font-size: 10px;
+    font-weight: 900;
+    color: var(--accent2);
+    background: rgba(0,0,0,0.4);
+    padding: 2px 6px;
+    border-radius: 4px;
+  }
+  .driver-card.drafted .ovr {
+    background: rgba(255,255,255,0.3);
+    color: #000;
+  }
+  .driver-card .name {
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 4px;
+    margin-right: 28px;
+  }
+  .driver-card .team {
+    font-size: 10px;
+    color: var(--muted);
+    line-height: 1.1;
+  }
+  .driver-card.drafted .team {
+    color: rgba(0,0,0,0.7);
+  }
+  .driver-card .era-mini {
+    font-size: 9px;
+    color: var(--accent);
+    font-weight: 700;
+    margin-top: 2px;
+  }
+  .draft-status {
+    background: linear-gradient(135deg, var(--panel2) 0%, var(--panel) 100%);
+    border: 2px dashed var(--border);
+    border-radius: 12px;
+    padding: 14px;
+    margin-bottom: 16px;
+    text-align: center;
+  }
+  .draft-status.full {
+    border-style: solid;
+    border-color: var(--accent);
+  }
+  .draft-status .count {
+    font-size: 28px;
+    font-weight: 900;
+    color: var(--accent2);
+    margin-bottom: 4px;
+  }
+  .draft-status .help {
+    color: var(--muted);
+    font-size: 12px;
+  }
+  .btn {
+    background: var(--accent);
+    color: #000;
+    border: none;
+    padding: 12px 24px;
+    font-size: 14px;
+    font-weight: 800;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.15s;
+    width: 100%;
+    letter-spacing: 0.02em;
+  }
+  .btn:hover:not(:disabled) {
+    background: var(--accent2);
+    transform: translateY(-1px);
+  }
+  .btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+  .btn-secondary {
+    background: var(--panel2);
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+  .btn-secondary:hover:not(:disabled) {
+    background: var(--border);
+  }
+  .btn-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+  }
+  .btn-row .btn { flex: 1; }
+  .race-log {
+    max-height: 400px;
+    overflow-y: auto;
+    margin: 12px 0;
+    padding: 4px;
+  }
+  .race-row {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 4px;
+    background: var(--panel2);
+    border-left: 4px solid var(--border);
+    font-size: 13px;
+  }
+  .race-row.win {
+    border-left-color: var(--good);
+    background: rgba(74, 222, 128, 0.08);
+  }
+  .race-row.loss {
+    border-left-color: var(--bad);
+    background: rgba(248, 113, 113, 0.08);
+  }
+  .race-num {
+    width: 36px;
+    color: var(--muted);
+    font-weight: 700;
+    font-size: 11px;
+  }
+  .race-name {
+    flex: 1;
+    font-weight: 600;
+  }
+  .race-result {
+    width: 80px;
+    text-align: right;
+    font-weight: 700;
+    font-size: 12px;
+  }
+  .race-row.win .race-result { color: var(--good); }
+  .race-row.loss .race-result { color: var(--bad); }
+  .race-pts {
+    width: 50px;
+    text-align: right;
+    color: var(--muted);
+    font-size: 11px;
+  }
+  .finale {
+    text-align: center;
+    padding: 30px 16px;
+  }
+  .finale .big {
+    font-size: clamp(40px, 9vw, 64px);
+    font-weight: 900;
+    background: linear-gradient(135deg, var(--accent2), var(--accent));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 8px;
+  }
+  .finale .sub {
+    font-size: 16px;
+    color: var(--muted);
+    margin-bottom: 20px;
+  }
+  .badge {
+    display: inline-block;
+    padding: 6px 12px;
+    border-radius: 20px;
+    background: var(--panel2);
+    border: 1px solid var(--border);
+    font-size: 12px;
+    font-weight: 700;
+    margin: 4px;
+  }
+  .badge.gold {
+    background: linear-gradient(135deg, #fbbf24, #f59e0b);
+    color: #000;
+    border-color: #f59e0b;
+  }
+  .badge.green {
+    background: rgba(74, 222, 128, 0.2);
+    color: var(--good);
+    border-color: var(--good);
+  }
+  .badge.red {
+    background: rgba(248, 113, 113, 0.2);
+    color: var(--bad);
+    border-color: var(--bad);
+  }
+  .share-card {
+    background: var(--panel2);
+    border: 2px solid var(--accent);
+    border-radius: 12px;
+    padding: 20px;
+    margin: 16px 0;
+    text-align: center;
+  }
+  .share-card .label {
+    font-size: 11px;
+    color: var(--muted);
+    margin-bottom: 6px;
+    letter-spacing: 0.1em;
+  }
+  .share-card .record {
+    font-size: 42px;
+    font-weight: 900;
+    color: var(--accent2);
+    font-family: "Courier New", monospace;
+    letter-spacing: 0.05em;
+  }
+  .footer {
+    text-align: center;
+    color: var(--muted);
+    font-size: 11px;
+    padding: 20px 0 30px;
+    border-top: 1px solid var(--border);
+    margin-top: 30px;
+  }
+  .podium {
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    gap: 8px;
+    margin: 16px 0;
+  }
+  .podium-place {
+    background: var(--panel2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 8px;
+    text-align: center;
+    flex: 1;
+  }
+  .podium-place .pos {
+    font-size: 11px;
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+  .podium-place .nm {
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .podium-place .pts {
+    font-size: 18px;
+    font-weight: 900;
+    color: var(--accent2);
+  }
+  .podium-place.first {
+    border-color: var(--gold);
+    background: rgba(251, 191, 36, 0.1);
+    transform: translateY(-8px);
+  }
+  .podium-place.first .pts { color: var(--gold); }
+  details {
+    margin: 12px 0;
+  }
+  details summary {
+    cursor: pointer;
+    padding: 8px;
+    background: var(--panel2);
+    border-radius: 8px;
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 600;
+  }
+  details[open] summary {
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+  .roster {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 4px;
+  }
+  .roster-chip {
+    background: var(--accent);
+    color: #000;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 700;
+  }
+  @media (max-width: 480px) {
+    .stats { grid-template-columns: repeat(2, 1fr); }
+    .driver-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>🏍 22-0: Moto3 Draft</h1>
+    <div class="tagline">Draft legends. Race 24. Win all. Crown a champion.</div>
+  </header>
+
+  <!-- DRAFT SCREEN -->
+  <div id="screen-draft">
+    <div class="stats">
+      <div class="stat"><div class="v" id="stat-picked">0</div><div class="l">Picked</div></div>
+      <div class="stat"><div class="v">5</div><div class="l">Needed</div></div>
+      <div class="stat"><div class="v" id="stat-avg">—</div><div class="l">Avg OVR</div></div>
+      <div class="stat"><div class="v">22</div><div class="l">Rounds</div></div>
+    </div>
+
+    <div class="draft-status" id="draft-status">
+      <div class="count" id="count-text">Pick 5 Moto3 legends</div>
+      <div class="help" id="help-text">Tap a driver to draft. Mix eras for synergy bonuses.</div>
+    </div>
+
+    <div class="tabs" id="era-tabs"></div>
+
+    <div class="panel">
+      <div class="driver-grid" id="driver-grid"></div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-secondary" id="reset-btn">Reset Draft</button>
+      <button class="btn" id="start-btn" disabled>Start Season →</button>
+    </div>
+  </div>
+
+  <!-- SEASON SCREEN -->
+  <div id="screen-season" hidden>
+    <div class="stats">
+      <div class="stat"><div class="v" id="season-wins">0</div><div class="l">Wins</div></div>
+      <div class="stat"><div class="v" id="season-streak">0</div><div class="l">Streak</div></div>
+      <div class="stat"><div class="v" id="season-points">0</div><div class="l">Points</div></div>
+      <div class="stat"><div class="v" id="season-race-num">1</div><div class="l">Race</div></div>
+    </div>
+
+    <div class="panel" id="race-panel">
+      <div style="text-align:center; padding:20px;">
+        <div style="font-size:11px; color:var(--muted); letter-spacing:0.1em; margin-bottom:6px;">RACE <span id="race-counter">1</span> OF 22</div>
+        <div id="race-title" style="font-size:22px; font-weight:900; color:var(--accent2); margin-bottom:4px;">—</div>
+        <div id="race-track" style="font-size:13px; color:var(--muted); margin-bottom:16px;">—</div>
+        <button class="btn" id="race-btn">▶ Simulate Race</button>
+        <div class="btn-row" id="race-next-row" hidden>
+          <button class="btn btn-secondary" id="race-detail-btn">📊 Race Detail</button>
+          <button class="btn" id="race-next-btn">Next Race →</button>
+        </div>
+      </div>
+      <div id="race-detail" hidden></div>
+    </div>
+
+    <details>
+      <summary>📜 Season Log</summary>
+      <div class="race-log" id="race-log"></div>
+    </details>
+  </div>
+
+  <!-- FINALE SCREEN -->
+  <div id="screen-finale" hidden>
+    <div class="finale">
+      <div class="big" id="finale-record">—</div>
+      <div class="sub" id="finale-title">—</div>
+      <div id="finale-badges" style="margin-bottom:20px;"></div>
+
+      <div class="share-card">
+        <div class="label">SHARE YOUR SEASON</div>
+        <div class="record" id="share-record">—</div>
+        <div style="font-size:11px; color:var(--muted); margin-top:6px;">#Moto322Zero #UndefeatedSeason</div>
+      </div>
+
+      <details>
+        <summary>🏆 Final Standings</summary>
+        <div class="podium" id="podium"></div>
+        <div id="full-standings"></div>
+      </details>
+
+      <details>
+        <summary>📜 Full Season Log (All 24 Rounds)</summary>
+        <div class="race-log" id="finale-log"></div>
+      </details>
+
+      <div class="btn-row">
+        <button class="btn btn-secondary" id="replay-btn">🔄 New Season</button>
+        <button class="btn" id="share-btn">📋 Copy Share Text</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    Made for 🏍 Moto3 fans · 84 legends · 6 eras · 22 rounds · 1 dream<br>
+    A tribute to <a href="https://github.com/TeapoyY/squad-draft-football" style="color:var(--accent);">38-0</a> · <a href="https://github.com/TeapoyY/formulae-17-draft" style="color:var(--accent);">17-0</a> · <a href="https://github.com/TeapoyY/sx-17-draft" style="color:var(--accent);">17-0</a> · <a href="https://github.com/TeapoyY/wsbk-24-draft" style="color:var(--accent);">24-0</a> drafting lineage.
+  </div>
+</div>
+
+<script>
+// ==========================================
+// Moto3 22-0: Single HTML MVP — X-0 Sports Draft #23 (forked from AMX 24-0 / WSBK 24-0 / MotoGP 20-0)
+// Reuses the X-0 Sports template proven by
+// NFL 38-0 (7/30), F1 24-0 (8/1), NASCAR 36-0 (8/17), IndyCar 17-0 (8/22),
+// MotoGP 20-0 (8/28), Endurance 24-0 (8/29), Tour de France 21-0 (9/3),
+// WSBK 24-0 (9/24), Moto2 22-0 (9/27), AMA MX 17-0 (10/5), AMX 24-0 (10/11)
+// ==========================================
+
+// --- SEEDED RNG ---
+function mulberry32(s) {
+    return function() {
+        s |= 0; s = (s + 0x6D2B79F5) | 0;
+        let t = Math.imul(s ^ (s >>> 15), 1 | s);
+        t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+}
+
+// --- MOTO3 RIDERS (84 legends across 6 eras: 250cc era 1990s → modern Moto3 2026) ---
+// OVR: 70-99 scale. Each era: 250cc / Early Moto3 / Mid Moto3 / Late Moto3 / Acosta / 2024-26
+const DRIVERS = [
+// Era 1: 250cc era (1990s-2011) — Legends who would have been Moto3 if class existed in 2012
+    { id: 1, era: 1, name: "Valentino Rossi", country: "ITA", ovr: 99, pos: "M3" },
+    { id: 2, era: 1, name: "Dani Pedrosa", country: "ESP", ovr: 99, pos: "M3" },
+    { id: 3, era: 1, name: "Jorge Lorenzo", country: "ESP", ovr: 98, pos: "M3" },
+    { id: 4, era: 1, name: "Casey Stoner", country: "AUS", ovr: 99, pos: "M3" },
+    { id: 5, era: 1, name: "Marco Melandri", country: "ITA", ovr: 94, pos: "M3" },
+    { id: 6, era: 1, name: "Sebastien Porto", country: "ARG", ovr: 90, pos: "M3" },
+    { id: 7, era: 1, name: "Andrea Dovizioso", country: "ITA", ovr: 95, pos: "M3" },
+    { id: 8, era: 1, name: "Hector Barbera", country: "ESP", ovr: 89, pos: "M3" },
+    { id: 9, era: 1, name: "Alvaro Bautista", country: "ESP", ovr: 92, pos: "M3" },
+    { id: 10, era: 1, name: "Thomas Luthi", country: "SUI", ovr: 91, pos: "M3" },
+    { id: 11, era: 1, name: "Julian Simon", country: "ESP", ovr: 90, pos: "M3" },
+    { id: 12, era: 1, name: "Mattia Pasini", country: "ITA", ovr: 88, pos: "M3" },
+    { id: 13, era: 1, name: "Mike di Meglio", country: "FRA", ovr: 89, pos: "M3" },
+    { id: 14, era: 1, name: "Alex Debon", country: "ESP", ovr: 87, pos: "M3" },
+
+// Era 2: Early Moto3 (2012-2015) — First Moto3-class champions
+    { id: 15, era: 2, name: "Maverick Viñales", country: "ESP", ovr: 96, pos: "M3" },
+    { id: 16, era: 2, name: "Jack Miller", country: "AUS", ovr: 95, pos: "M3" },
+    { id: 17, era: 2, name: "Alex Marquez", country: "ESP", ovr: 93, pos: "M3" },
+    { id: 18, era: 2, name: "Danny Kent", country: "GBR", ovr: 92, pos: "M3" },
+    { id: 19, era: 2, name: "Miguel Oliveira", country: "POR", ovr: 94, pos: "M3" },
+    { id: 20, era: 2, name: "Brad Binder", country: "RSA", ovr: 93, pos: "M3" },
+    { id: 21, era: 2, name: "Luis Salom", country: "ESP", ovr: 91, pos: "M3" },
+    { id: 22, era: 2, name: "Efren Vazquez", country: "ESP", ovr: 88, pos: "M3" },
+    { id: 23, era: 2, name: "Romano Fenati", country: "ITA", ovr: 90, pos: "M3" },
+    { id: 24, era: 2, name: "Enea Bastianini", country: "ITA", ovr: 91, pos: "M3" },
+    { id: 25, era: 2, name: "Niccolo Antonelli", country: "ITA", ovr: 87, pos: "M3" },
+    { id: 26, era: 2, name: "Isaac Viñales", country: "ESP", ovr: 86, pos: "M3" },
+    { id: 27, era: 2, name: "Jakub Kornfeil", country: "CZE", ovr: 87, pos: "M3" },
+    { id: 28, era: 2, name: "Zulfahmi Khairuddin", country: "MAS", ovr: 85, pos: "M3" },
+
+// Era 3: Mid Moto3 (2016-2019) — Binder/Mir/Martin era
+    { id: 29, era: 3, name: "Joan Mir", country: "ESP", ovr: 96, pos: "M3" },
+    { id: 30, era: 3, name: "Jorge Martin", country: "ESP", ovr: 95, pos: "M3" },
+    { id: 31, era: 3, name: "Fabio Di Giannantonio", country: "ITA", ovr: 92, pos: "M3" },
+    { id: 32, era: 3, name: "Lorenzo Dalla Porta", country: "ITA", ovr: 89, pos: "M3" },
+    { id: 33, era: 3, name: "Albert Arenas", country: "ESP", ovr: 88, pos: "M3" },
+    { id: 34, era: 3, name: "Tatsuki Suzuki", country: "JPN", ovr: 87, pos: "M3" },
+    { id: 35, era: 3, name: "Marco Bezzecchi", country: "ITA", ovr: 91, pos: "M3" },
+    { id: 36, era: 3, name: "Marcos Ramirez", country: "ESP", ovr: 86, pos: "M3" },
+    { id: 37, era: 3, name: "Aron Canet", country: "ESP", ovr: 91, pos: "M3" },
+    { id: 38, era: 3, name: "Gabriel Rodrigo", country: "ARG", ovr: 85, pos: "M3" },
+    { id: 39, era: 3, name: "John McPhee", country: "GBR", ovr: 88, pos: "M3" },
+    { id: 40, era: 3, name: "Andrea Migno", country: "ITA", ovr: 86, pos: "M3" },
+    { id: 41, era: 3, name: "Philipp Oettl", country: "GER", ovr: 85, pos: "M3" },
+    { id: 42, era: 3, name: "Fabio Quartararo", country: "FRA", ovr: 92, pos: "M3" },
+
+// Era 4: Late Moto3 (2020-2022) — Acosta arrives
+    { id: 43, era: 4, name: "Pedro Acosta", country: "ESP", ovr: 99, pos: "M3" },
+    { id: 44, era: 4, name: "Izan Guevara", country: "ESP", ovr: 92, pos: "M3" },
+    { id: 45, era: 4, name: "Sergio Garcia", country: "ESP", ovr: 90, pos: "M3" },
+    { id: 46, era: 4, name: "Dennis Foggia", country: "ITA", ovr: 90, pos: "M3" },
+    { id: 47, era: 4, name: "Ayumu Sasaki", country: "JPN", ovr: 90, pos: "M3" },
+    { id: 48, era: 4, name: "Jaume Masia", country: "ESP", ovr: 91, pos: "M3" },
+    { id: 49, era: 4, name: "Xavier Artigas", country: "ESP", ovr: 86, pos: "M3" },
+    { id: 50, era: 4, name: "Riccardo Rossi", country: "ITA", ovr: 84, pos: "M3" },
+    { id: 51, era: 4, name: "Carlos Tatay", country: "ESP", ovr: 83, pos: "M3" },
+    { id: 52, era: 4, name: "Jeremy Alcoba", country: "ESP", ovr: 85, pos: "M3" },
+    { id: 53, era: 4, name: "Darryn Binder", country: "RSA", ovr: 86, pos: "M3" },
+    { id: 54, era: 4, name: "Stefano Nepa", country: "ITA", ovr: 83, pos: "M3" },
+    { id: 55, era: 4, name: "Kaito Toba", country: "JPN", ovr: 82, pos: "M3" },
+    { id: 56, era: 4, name: "Filip Salač", country: "CZE", ovr: 84, pos: "M3" },
+
+// Era 5: Acosta/Alonso Era (2023)
+    { id: 57, era: 5, name: "David Alonso", country: "COL", ovr: 98, pos: "M3" },
+    { id: 58, era: 5, name: "Ayumu Sasaki", country: "JPN", ovr: 91, pos: "M3" },
+    { id: 59, era: 5, name: "Daniel Holgado", country: "ESP", ovr: 90, pos: "M3" },
+    { id: 60, era: 5, name: "Ivan Ortola", country: "ESP", ovr: 88, pos: "M3" },
+    { id: 61, era: 5, name: "Collin Veijer", country: "NED", ovr: 89, pos: "M3" },
+    { id: 62, era: 5, name: "Jaume Masia", country: "ESP", ovr: 90, pos: "M3" },
+    { id: 63, era: 5, name: "Diogo Moreira", country: "BRA", ovr: 87, pos: "M3" },
+    { id: 64, era: 5, name: "Deniz Öncü", country: "TUR", ovr: 86, pos: "M3" },
+    { id: 65, era: 5, name: "Stefano Nepa", country: "ITA", ovr: 82, pos: "M3" },
+    { id: 66, era: 5, name: "Luca Lunetta", country: "ITA", ovr: 80, pos: "M3" },
+    { id: 67, era: 5, name: "Matteo Bertelle", country: "ITA", ovr: 81, pos: "M3" },
+    { id: 68, era: 5, name: "Adrian Fernandez", country: "ESP", ovr: 82, pos: "M3" },
+    { id: 69, era: 5, name: "Jose Antonio Rueda", country: "ESP", ovr: 87, pos: "M3" },
+    { id: 70, era: 5, name: "Filip Salač", country: "CZE", ovr: 84, pos: "M3" },
+
+// Era 6: 2024-2026 — Modern Moto3 era
+    { id: 71, era: 6, name: "David Alonso", country: "COL", ovr: 99, pos: "M3" },
+    { id: 72, era: 6, name: "Collin Veijer", country: "NED", ovr: 92, pos: "M3" },
+    { id: 73, era: 6, name: "Daniel Holgado", country: "ESP", ovr: 91, pos: "M3" },
+    { id: 74, era: 6, name: "Ivan Ortola", country: "ESP", ovr: 89, pos: "M3" },
+    { id: 75, era: 6, name: "David Muñoz", country: "ESP", ovr: 88, pos: "M3" },
+    { id: 76, era: 6, name: "Angel Piqueras", country: "ESP", ovr: 87, pos: "M3" },
+    { id: 77, era: 6, name: "Joel Kelso", country: "AUS", ovr: 86, pos: "M3" },
+    { id: 78, era: 6, name: "Adrian Fernandez", country: "ESP", ovr: 85, pos: "M3" },
+    { id: 79, era: 6, name: "Jose Antonio Rueda", country: "ESP", ovr: 88, pos: "M3" },
+    { id: 80, era: 6, name: "Taiyo Furusato", country: "JPN", ovr: 84, pos: "M3" },
+    { id: 81, era: 6, name: "Nicola Carraro", country: "ITA", ovr: 80, pos: "M3" },
+    { id: 82, era: 6, name: "Xabi Zurutuza", country: "ESP", ovr: 79, pos: "M3" },
+    { id: 83, era: 6, name: "Ruche Moodley", country: "RSA", ovr: 78, pos: "M3" },
+    { id: 84, era: 6, name: "Veda Pratama", country: "INA", ovr: 76, pos: "M3" }
+];
+
+const ERA_NAMES = {
+    1: "250cc Era",
+    2: "Early Moto3",
+    3: "Mid Moto3",
+    4: "Late Moto3",
+    5: "Acosta Era",
+    6: "2024-2026"
+};
+
+const ERA_LABELS = {
+    1: "250cc",
+    2: "Early",
+    3: "Mid",
+    4: "Late",
+    5: "Acosta",
+    6: "Now"
+};
+
+// Realistic 2026 Moto3 calendar (22 rounds — 14 road + 3 street + 5 mixed circuits)
+// Track types: 'road' / 'mixed' / 'street' — calibrated from MotoGP 20-0
+const SCHEDULE = [
+    { name: "Thailand", track: "Chang International Circuit, Buriram", type: "road" },
+    { name: "Brazil", track: "Autodromo Internacional Ayrton Senna, Goiania", type: "road" },
+    { name: "USA Americas", track: "Circuit of the Americas, Austin TX", type: "road" },
+    { name: "Spain Jerez", track: "Circuito de Jerez Angel Nieto", type: "road" },
+    { name: "France Le Mans", track: "Le Mans Bugatti Circuit", type: "road" },
+    { name: "Catalonia", track: "Circuit de Barcelona-Catalunya", type: "road" },
+    { name: "Italy Mugello", track: "Autodromo del Mugello, Scarperia", type: "road" },
+    { name: "Hungary Balaton", track: "Balaton Park Circuit, Budapest", type: "road" },
+    { name: "Czech Republic", track: "Automotodrom Brno", type: "road" },
+    { name: "Dutch TT", track: "TT Circuit Assen", type: "road" },
+    { name: "Germany Sachsenring", track: "Sachsenring, Hohenstein-Ernsthal", type: "road" },
+    { name: "Britain Silverstone", track: "Silverstone Circuit", type: "road" },
+    { name: "Aragon", track: "MotorLand Aragon, Alcaniz", type: "road" },
+    { name: "Misano San Marino", track: "Misano World Circuit Marco Simoncelli", type: "road" },
+    { name: "Austria Spielberg", track: "Red Bull Ring, Spielberg", type: "road" },
+    { name: "Japan Motegi", track: "Mobility Resort Motegi", type: "mixed" },
+    { name: "Indonesia Mandalika", track: "Pertamina Mandalika Circuit", type: "street" },
+    { name: "Australia Phillip Island", track: "Phillip Island Grand Prix Circuit", type: "mixed" },
+    { name: "Malaysia Sepang", track: "Sepang International Circuit", type: "mixed" },
+    { name: "Qatar Lusail", track: "Lusail International Circuit", type: "mixed" },
+    { name: "Portugal Portimao", track: "Autodromo Internacional do Algarve", type: "mixed" },
+    { name: "Valencia Finale", track: "Circuit Ricardo Tormo, Cheste", type: "road" }
+]
+
+// --- GAME STATE ---
+let state = {
+    phase: 'draft',  // draft / season / finale
+    drafted: [],
+    selectedEra: 1,
+    season: null,
+    rng: null,
+    seed: 0
+};
+
+// --- WIN PROBABILITY ---
+// Reuses AMA MX 17-0 calibrated formula (84-93 AI), extended for 24-race season
+function winProb(ovr, raceType, isSuperspeedway) {
+    // Base: 0.05 to 0.95 based on OVR
+    let base = Math.min(0.95, Math.max(0.05, (ovr - 70) / 30));
+
+    // Track-type bonuses (Moto3: 14 road + 3 street + 5 mixed circuits)
+    const bonuses = {
+        'road':    0.00,  // permanent circuits - neutral
+        'mixed':  -0.02,  // hybrid circuits - moderate chaos
+        'street': -0.05,  // urban circuits - high chaos
+    };
+    base += (bonuses[raceType] || 0);
+
+    return Math.min(0.97, Math.max(0.03, base));
+}
+
+// --- ERA SYNERGY BONUS ---
+// Picking drivers from same team or same era gives small bonus
+function eraSynergy(drafted) {
+    const eras = drafted.map(d => d.era);
+    const eraCounts = {};
+    eras.forEach(e => eraCounts[e] = (eraCounts[e] || 0) + 1);
+    const maxCount = Math.max(...Object.values(eraCounts));
+    // +1.5 OVR for each extra driver from same era beyond the first
+    return (maxCount - 1) * 1.5;
+}
+
+// --- SIMULATE A SINGLE RACE ---
+function simulateRace(playerOVR, raceType, rng) {
+    // Generate AI field of 35 other cars with realistic OVR distribution
+    const field = [];
+    for (let i = 0; i < 35; i++) {
+        // AI drivers weighted around OVR 84-93 (strong AMA MX field, all-road circuits favor elite teams)
+        const aiOVR = 84 + Math.floor(rng() * 10);
+        field.push({ name: `AI #${i+2}`, ovr: aiOVR, type: raceType });
+    }
+
+    // Add player
+    field.push({ name: 'YOU', ovr: playerOVR, type: raceType, isPlayer: true });
+
+    // Each car: simulate a continuous score based on OVR + variance
+    // Continuous scoring ensures the best OVR reliably finishes at the top,
+    // not randomly tied with low-OVR AI cars that happened to roll 1 on a binary coin
+    field.forEach(car => {
+        const prob = winProb(car.ovr, raceType);
+        // Variance: ±10% per race
+        const variance = (rng() - 0.5) * 0.20;
+        const adjusted = Math.min(0.97, Math.max(0.03, prob + variance));
+        // Use a continuous noise term as score
+        car.score = adjusted + (rng() - 0.5) * 0.20;
+    });
+
+    // Add oval pack-racing chaos (drafting can upset strong cars)
+    if (raceType === 'oval') {
+        field.forEach(car => {
+            if (!car.isPlayer && car.ovr < 85) {
+                car.score += rng() * 0.22;  // more chaos
+            }
+        });
+    }
+
+    // Sort by score, get player's position
+    field.sort((a, b) => b.score - a.score);
+    const playerPos = field.findIndex(c => c.isPlayer) + 1;
+    return { playerPos, field };
+}
+
+// --- POINTS CALCULATION (Modern AMA MX: 25-1 system, top 15 score) ---
+function pointsForPos(pos, raceIdx) {
+    // Modern AMA MX: 25-1 system, top 15 score (since 2023)
+    // P1=25, P2=20, P3=16, P4=13, P5=11, P6=10, P7=9, P8=8, P9=7, P10=6
+    // P11=5, P12=4, P13=3, P14=2, P15=1, P16+ = 0
+    // No double points at any race
+    const POINTS = [25, 20, 16, 13, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1];
+    return POINTS[pos - 1] || 0;
+}
+
+// --- UI HELPERS ---
+function $(id) { return document.getElementById(id); }
+function show(id) { $(id).hidden = false; }
+function hide(id) { $(id).hidden = true; }
+
+function switchScreen(name) {
+    hide('screen-draft');
+    hide('screen-season');
+    hide('screen-finale');
+    show(`screen-${name}`);
+    state.phase = name;
+}
+
+// --- ERA TABS RENDER ---
+function renderTabs() {
+    const tabs = $('era-tabs');
+    tabs.innerHTML = '';
+    for (let era = 1; era <= 6; era++) {
+        const btn = document.createElement('button');
+        btn.className = 'tab' + (era === state.selectedEra ? ' active' : '');
+        btn.textContent = ERA_LABELS[era];
+        btn.onclick = () => {
+            state.selectedEra = era;
+            renderTabs();
+            renderDrivers();
+        };
+        tabs.appendChild(btn);
+    }
+}
+
+// --- DRIVERS RENDER ---
+function renderDrivers() {
+    const grid = $('driver-grid');
+    grid.innerHTML = '';
+    const drivers = DRIVERS.filter(d => d.era === state.selectedEra);
+    drivers.forEach(d => {
+        const drafted = state.drafted.some(x => x.id === d.id);
+        const card = document.createElement('div');
+        card.className = 'driver-card' + (drafted ? ' drafted' : '');
+        card.innerHTML = `
+            <div class="ovr">${d.ovr}</div>
+            <div class="name">${d.name}</div>
+            <div class="team">${d.country}</div>
+        `;
+        if (!drafted) {
+            card.onclick = () => draftDriver(d);
+        }
+        grid.appendChild(card);
+    });
+}
+
+// --- DRAFT LOGIC ---
+function draftDriver(d) {
+    if (state.drafted.length >= 5) return;
+    if (state.drafted.some(x => x.id === d.id)) return;
+    state.drafted.push(d);
+    updateDraftUI();
+    renderDrivers();
+}
+
+function undraftDriver(id) {
+    state.drafted = state.drafted.filter(d => d.id !== id);
+    updateDraftUI();
+    renderDrivers();
+}
+
+function updateDraftUI() {
+    const n = state.drafted.length;
+    $('stat-picked').textContent = n;
+    if (n > 0) {
+        const avg = (state.drafted.reduce((s, d) => s + d.ovr, 0) / n + eraSynergy(state.drafted)).toFixed(0);
+        $('stat-avg').textContent = avg;
+    } else {
+        $('stat-avg').textContent = '—';
+    }
+
+    const status = $('draft-status');
+    const countText = $('count-text');
+    const helpText = $('help-text');
+    if (n === 0) {
+        countText.textContent = 'Pick 5 Moto3 legends';
+        helpText.textContent = 'Tap a driver to draft. Mix eras for synergy bonuses.';
+        status.classList.remove('full');
+    } else if (n < 5) {
+        countText.textContent = `${n}/5 drivers drafted`;
+        helpText.textContent = `Pick ${5 - n} more. Avg OVR: ${$('stat-avg').textContent}`;
+        status.classList.remove('full');
+    } else {
+        countText.textContent = '🏎 Roster Complete!';
+        helpText.textContent = `Avg OVR: ${$('stat-avg').textContent} (incl +${eraSynergy(state.drafted).toFixed(1)} era synergy)`;
+        status.classList.add('full');
+    }
+
+    // Show chips
+    const existingChips = status.querySelectorAll('.roster-chip');
+    existingChips.forEach(c => c.remove());
+    if (n > 0) {
+        const rosterDiv = document.createElement('div');
+        rosterDiv.className = 'roster';
+        rosterDiv.style.marginTop = '10px';
+        state.drafted.forEach(d => {
+            const chip = document.createElement('span');
+            chip.className = 'roster-chip';
+            chip.textContent = `${d.name} ${d.ovr}`;
+            chip.onclick = () => undraftDriver(d.id);
+            chip.style.cursor = 'pointer';
+            chip.title = 'Tap to remove';
+            rosterDiv.appendChild(chip);
+        });
+        status.appendChild(rosterDiv);
+    }
+
+    $('start-btn').disabled = n !== 5;
+}
+
+// --- RESET ---
+$('reset-btn').onclick = () => {
+    state.drafted = [];
+    updateDraftUI();
+    renderDrivers();
+};
+
+// --- START SEASON ---
+$('start-btn').onclick = () => {
+    // Pick highest-OVR drafted driver as primary; pool all 6 for variation
+    state.seed = Date.now();
+    state.rng = mulberry32(state.seed);
+    state.season = {
+        results: [],  // [{ race, name, pos, points }]
+        standings: {},  // driver.id -> total points
+        playerWins: 0,
+        bestStreak: 0,
+        currentStreak: 0,
+        primaryDriver: state.drafted.sort((a, b) => b.ovr - a.ovr)[0],
+        allDrafted: state.drafted
+    };
+    // Init standings
+    state.season.standings[state.season.primaryDriver.id] = 0;
+    state.drafted.forEach(d => state.season.standings[d.id] = 0);
+
+    switchScreen('season');
+    $('race-counter').textContent = '1';
+    $('race-counter-end') && ($('race-counter-end').textContent = '1');
+    showNextRace();
+};
+
+function showNextRace() {
+    const i = state.season.results.length;
+    if (i >= SCHEDULE.length) {
+        showFinale();
+        return;
+    }
+    const race = SCHEDULE[i];
+    $('race-counter').textContent = (i + 1);
+    $('season-race-num').textContent = (i + 1);
+    $('race-title').textContent = race.name;
+    $('race-track').textContent = `${race.track} · ${race.type}`;
+    show('race-btn');
+    hide('race-next-row');
+    hide('race-detail');
+}
+
+$('race-btn').onclick = () => {
+    const i = state.season.results.length;
+    const race = SCHEDULE[i];
+    // Player uses best drafted driver as primary; pool of 6 allows occasional rotation
+    // For simplicity: use primary driver for entire season
+    const playerOVR = state.season.primaryDriver.ovr + eraSynergy(state.season.allDrafted);
+    const result = simulateRace(playerOVR, race.type, state.rng);
+    const pts = pointsForPos(result.playerPos, i);
+    const win = result.playerPos === 1;
+    state.season.results.push({
+        race: i + 1,
+        name: race.name,
+        track: race.track,
+        type: race.type,
+        pos: result.playerPos,
+        points: pts,
+        win: win
+    });
+
+    // Update standings
+    state.season.standings[state.season.primaryDriver.id] += pts;
+
+    // Streak
+    if (win) {
+        state.season.playerWins++;
+        state.season.currentStreak++;
+        if (state.season.currentStreak > state.season.bestStreak) {
+            state.season.bestStreak = state.season.currentStreak;
+        }
+    } else {
+        state.season.currentStreak = 0;
+    }
+
+    // Show race detail (top 5)
+    let detailHTML = '<div style="font-size:11px; color:var(--muted); letter-spacing:0.1em; margin-bottom:6px;">TOP 5 FINISH</div>';
+    result.field.slice(0, 5).forEach((car, idx) => {
+        const pos = idx + 1;
+        const isYou = car.isPlayer;
+        detailHTML += `<div class="race-row ${isYou ? 'win' : ''}" style="border-left-color:${isYou ? 'var(--accent2)' : 'var(--border)'}">
+            <div class="race-num">P${pos}</div>
+            <div class="race-name">${car.name}${isYou ? ' 🏁' : ''}</div>
+            <div class="race-result">OVR ${car.ovr}</div>
+        </div>`;
+    });
+    $('race-detail').innerHTML = detailHTML;
+
+    // Update season UI
+    $('season-wins').textContent = state.season.playerWins;
+    $('season-streak').textContent = state.season.currentStreak;
+    $('season-points').textContent = state.season.results.reduce((s, r) => s + r.points, 0);
+
+    // Update race log
+    const logRow = document.createElement('div');
+    logRow.className = `race-row ${win ? 'win' : 'loss'}`;
+    logRow.innerHTML = `
+        <div class="race-num">R${i + 1}</div>
+        <div class="race-name">${race.name}</div>
+        <div class="race-result">P${result.playerPos}${win ? ' 🏆' : ''}</div>
+        <div class="race-pts">+${pts}</div>
+    `;
+    $('race-log').prepend(logRow);
+
+    // Swap buttons
+    hide('race-btn');
+    show('race-next-row');
+    if (i >= SCHEDULE.length - 1) {
+        $('race-next-btn').textContent = 'See Final Standings →';
+    } else {
+        $('race-next-btn').textContent = 'Next Race →';
+    }
+};
+
+$('race-detail-btn').onclick = () => {
+    const d = $('race-detail');
+    if (d.hidden) show('race-detail');
+    else hide('race-detail');
+};
+
+$('race-next-btn').onclick = () => {
+    showNextRace();
+};
+
+// --- FINALE ---
+function showFinale() {
+    switchScreen('finale');
+    const wins = state.season.playerWins;
+    const totalRaces = SCHEDULE.length;
+
+    // Record (Wins-Losses)
+    const record = `${wins}-${totalRaces - wins}`;
+    $('finale-record').textContent = record;
+    $('share-record').textContent = record;
+
+    // Title
+    let title = '';
+    if (wins === 22) title = '🏆 UNDEFEATED — 22-0 LEGEND!';
+    else if (wins >= 18) title = `🏆 ELITE — ${wins} wins / 22`;
+    else if (wins >= 14) title = `🏍 STRONG — ${wins} wins / 22`;
+    else if (wins >= 9) title = `🏍 CHAMPIONSHIP BID — ${wins} wins / 22`;
+    else title = `${wins} wins / 22 — Try a stronger roster next time`;
+    $('finale-title').textContent = title;
+
+    // Badges
+    let badgesHTML = '';
+    if (wins === 22) badgesHTML += '<span class="badge gold">⭐ Perfect Season</span>';
+    if (state.season.bestStreak >= 8) badgesHTML += `<span class="badge green">🔥 ${state.season.bestStreak}-Race Streak</span>`;
+    if (wins >= 12) badgesHTML += '<span class="badge green">Title Contender</span>';
+    if (wins < 6) badgesHTML += '<span class="badge red">Rebuild Year</span>';
+    $('finale-badges').innerHTML = badgesHTML;
+
+    // Podium (top 3 drafted drivers by points, but player = primary driver)
+    const podiumHTML = `
+        <div class="podium-place">
+            <div class="pos">YOUR #1</div>
+            <div class="nm">${state.season.primaryDriver.name}</div>
+            <div class="pts">${state.season.standings[state.season.primaryDriver.id]}</div>
+        </div>
+    `;
+    $('podium').innerHTML = podiumHTML;
+
+    // Full season log
+    $('finale-log').innerHTML = '';
+    state.season.results.forEach(r => {
+        const row = document.createElement('div');
+        row.className = `race-row ${r.win ? 'win' : 'loss'}`;
+        row.innerHTML = `
+            <div class="race-num">R${r.race}</div>
+            <div class="race-name">${r.name}</div>
+            <div class="race-result">P${r.pos}${r.win ? ' 🏆' : ''}</div>
+            <div class="race-pts">+${r.points}</div>
+        `;
+        $('finale-log').appendChild(row);
+    });
+}
+
+$('replay-btn').onclick = () => {
+    state = { phase: 'draft', drafted: [], selectedEra: 1, season: null, rng: null, seed: 0 };
+    renderTabs();
+    renderDrivers();
+    updateDraftUI();
+    $('race-log').innerHTML = '';
+    switchScreen('draft');
+};
+
+$('share-btn').onclick = () => {
+    const text = `🏍 My Moto3 22-0 season: ${$('share-record').textContent}\n` +
+                 `Driver: ${state.season.primaryDriver.name} (OVR ${state.season.primaryDriver.ovr})\n` +
+                 `Best Streak: ${state.season.bestStreak}\n` +
+                 `#Moto322Zero #UndefeatedSeason`;
+    if (navigator.clipboard) {
+        navigator.clipboard.writeText(text).then(() => {
+            $('share-btn').textContent = '✅ Copied!';
+            setTimeout(() => $('share-btn').textContent = '📋 Copy Share Text', 1500);
+        });
+    } else {
+        alert(text);
+    }
+};
+
+// --- INIT ---
+renderTabs();
+renderDrivers();
+updateDraftUI();
+</script>
+</body>
+</html>
