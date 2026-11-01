@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#0a0e14">
 <title>🏍 22-0: Moto3 Draft — Can You Sweep The Season?</title>
 <meta name="description" content="Draft legendary Moto3 riders across the eras and try to win every race in a 22-round Grand Prix season. 84 legends. 6 eras. 22 rounds. 1 goal: 22-0.">
@@ -21,6 +21,7 @@
     --gold: #fbbf24;
     --shadow: 0 4px 20px rgba(0,0,0,0.4);
   }
+  [hidden] { display: none !important; }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html, body {
     background: var(--bg);
@@ -142,6 +143,9 @@
     gap: 8px;
   }
   .driver-card {
+    font: inherit;
+    color: inherit;
+    text-align: left;
     background: var(--panel2);
     border: 1px solid var(--border);
     border-radius: 10px;
@@ -439,6 +443,8 @@
     padding: 4px;
   }
   .roster-chip {
+    font-family: inherit;
+    border: none;
     background: var(--accent);
     color: #000;
     padding: 4px 10px;
@@ -456,7 +462,7 @@
 <div class="wrap">
   <header>
     <h1>🏍 22-0: Moto3 Draft</h1>
-    <div class="tagline">Draft legends. Race 24. Win all. Crown a champion.</div>
+    <div class="tagline">Draft legends. Race 22. Win all. Crown a champion.</div>
   </header>
 
   <!-- DRAFT SCREEN -->
@@ -470,7 +476,7 @@
 
     <div class="draft-status" id="draft-status">
       <div class="count" id="count-text">Pick 5 Moto3 legends</div>
-      <div class="help" id="help-text">Tap a driver to draft. Mix eras for synergy bonuses.</div>
+      <div class="help" id="help-text">Tap a driver to draft. Pick riders from the same era for synergy bonuses.</div>
     </div>
 
     <div class="tabs" id="era-tabs"></div>
@@ -534,7 +540,7 @@
       </details>
 
       <details>
-        <summary>📜 Full Season Log (All 24 Rounds)</summary>
+        <summary>📜 Full Season Log (All 22 Rounds)</summary>
         <div class="race-log" id="finale-log"></div>
       </details>
 
@@ -840,7 +846,9 @@ function renderDrivers() {
     const drivers = DRIVERS.filter(d => d.era === state.selectedEra);
     drivers.forEach(d => {
         const drafted = state.drafted.some(x => x.id === d.id);
-        const card = document.createElement('div');
+        const card = document.createElement('button');
+        card.type = 'button';
+        card.disabled = drafted;
         card.className = 'driver-card' + (drafted ? ' drafted' : '');
         card.innerHTML = `
             <div class="ovr">${d.ovr}</div>
@@ -884,7 +892,7 @@ function updateDraftUI() {
     const helpText = $('help-text');
     if (n === 0) {
         countText.textContent = 'Pick 5 Moto3 legends';
-        helpText.textContent = 'Tap a driver to draft. Mix eras for synergy bonuses.';
+        helpText.textContent = 'Tap a driver to draft. Pick riders from the same era for synergy bonuses.';
         status.classList.remove('full');
     } else if (n < 5) {
         countText.textContent = `${n}/5 drivers drafted`;
@@ -904,7 +912,9 @@ function updateDraftUI() {
         rosterDiv.className = 'roster';
         rosterDiv.style.marginTop = '10px';
         state.drafted.forEach(d => {
-            const chip = document.createElement('span');
+            const chip = document.createElement('button');
+            chip.type = 'button';
+            chip.setAttribute('aria-label', `Remove ${d.name} from roster`);
             chip.className = 'roster-chip';
             chip.textContent = `${d.name} ${d.ovr}`;
             chip.onclick = () => undraftDriver(d.id);
@@ -943,6 +953,9 @@ $('start-btn').onclick = () => {
     state.season.standings[state.season.primaryDriver.id] = 0;
     state.drafted.forEach(d => state.season.standings[d.id] = 0);
 
+    ['season-wins', 'season-streak', 'season-points'].forEach(id => {
+        $(id).textContent = '0';
+    });
     switchScreen('season');
     $('race-counter').textContent = '1';
     $('race-counter-end') && ($('race-counter-end').textContent = '1');
@@ -1118,6 +1131,8 @@ $('share-btn').onclick = () => {
         navigator.clipboard.writeText(text).then(() => {
             $('share-btn').textContent = '✅ Copied!';
             setTimeout(() => $('share-btn').textContent = '📋 Copy Share Text', 1500);
+        }).catch(() => {
+            window.prompt('Copy share text:', text);
         });
     } else {
         alert(text);
